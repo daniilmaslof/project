@@ -1,0 +1,11 @@
+app-editor {
+  display: block;
+  width:40vw;
+}
+.container{
+  display: flex;
+}
+app-aria-variables{
+  margin-right: 10px;
+}
+

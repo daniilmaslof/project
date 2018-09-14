@@ -1,0 +1,7 @@
+.mat-row:hover {
+  background-color: #dedede;
+  cursor: pointer
+}
+.table-header{
+  display: flex;
+}

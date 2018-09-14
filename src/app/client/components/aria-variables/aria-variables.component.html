@@ -1,0 +1,36 @@
+<div class="table-header mat-elevation-z2">
+  <mat-form-field>
+    <input matInput placeholder="Search variable" [formControl]="searchField">
+  </mat-form-field>
+  <button mat-mini-fab color="primary" (click)="addVariable()">
+    <mat-icon aria-label="add">add</mat-icon>
+  </button>
+</div>
+<mat-table class="cars-table mat-elevation-z8"
+           [dataSource]="dataSource"
+           matSort
+           (matSortChange)="sortTableChange($event)"
+           matSortDisableClear>
+
+  <ng-container matColumnDef="name">
+
+    <mat-header-cell *matHeaderCellDef mat-sort-header>name variable</mat-header-cell>
+
+    <mat-cell *matCellDef="let variable">{{variable.name}}</mat-cell>
+
+  </ng-container>
+  <ng-container matColumnDef="value">
+
+    <mat-header-cell *matHeaderCellDef mat-sort-header>value variable</mat-header-cell>
+
+    <mat-cell *matCellDef="let variable">{{variable.value}}</mat-cell>
+
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns" (click)="editVaraible(row)"></mat-row>
+
+</mat-table>
+
+<mat-error>{{dataSource.error$ | async}}</mat-error>
+

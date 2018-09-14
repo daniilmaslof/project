@@ -1,0 +1,14 @@
+<h2>Variable</h2>
+<form [formGroup]="variableForm" (ngSubmit)="create()">
+  <mat-form-field>
+    <input matInput class="form-control" placeholder="Name" type="text" name="name" formControlName="name">
+    <mat-error *ngIf="name.invalid"> {{getErrorMessageName()}}</mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput placeholder="value" type="text" name="value" formControlName="value">
+  </mat-form-field>
+  <div class="form-buttons"></div>
+  <button [disabled]="variableForm.invalid" type="submit" mat-raised-button color="primary">Create</button>
+
+</form>
+<button mat-button (click)="close()">Close</button>
