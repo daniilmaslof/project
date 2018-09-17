@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 
 import {Mention} from '../../../core/models/mention';
@@ -6,13 +6,15 @@ import {Variable} from '../../../core/models/Variable';
 import {EditorService} from '../../../core/services/editor.service';
 import {VariableService} from '../../../core/services/variable.service';
 import {VariableComponent} from '../variable/variable.component';
+import {Subject} from 'rxjs/internal/Subject';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css'],
 })
-export class EditorComponent implements OnInit {
+export class EditorComponent implements OnInit, OnDestroy {
   /**
    * Editor instance.
    */
@@ -21,6 +23,7 @@ export class EditorComponent implements OnInit {
    * Configure/disable quill modules, e.g toolbar or add custom toolbar via html element default is.
    */
   public modules: any;
+  private $ngUnsubscribe: Subject<void> = new Subject<void>();
 
   /**
    * @param editorService service that stores delta and flow new delta.
@@ -38,7 +41,8 @@ export class EditorComponent implements OnInit {
    * Init modules editor.
    */
   public ngOnInit(): void {
-    this.variableService.changesInVariables$.subscribe(
+    this.variableService.changesInVariables$
+      .pipe(takeUntil(this.$ngUnsubscribe)).subscribe(
       ([oldVariable, newVaraible]) => {
         this.changeVariablesInDeltaTree(oldVariable, newVaraible);
       },
@@ -87,7 +91,6 @@ export class EditorComponent implements OnInit {
    * equal oldVariable value change to a newVariable name and value newVariable = id mention.
    */
   private changeVariablesInDeltaTree(oldVariable: Variable, newVariable: Variable): void {
-    console.log(this.editorQuill);
     this.editorQuill.setContents(
       this.editorQuill.getContents().map(
         deltaOperation => {
@@ -149,5 +152,13 @@ export class EditorComponent implements OnInit {
    */
   public handleContentChange(editor: any): void {
     this.editorService.setChangedDelta(editor.delta);
+  }
+
+  /**
+   Unsubscribe.
+   */
+  public ngOnDestroy(): void {
+    this.$ngUnsubscribe.next();
+    this.$ngUnsubscribe.complete();
   }
 }
