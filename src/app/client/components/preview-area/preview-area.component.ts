@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 
 import {PreviewEditorService} from '../../../core/services/preview-editor.service';
+import Quill from 'quill';
 
 @Component({
   selector: 'app-preview-area',
@@ -26,7 +27,7 @@ export class PreviewAreaComponent implements OnInit {
    */
   public createdPreviewQuill(editor: any): void {
     this.previewQuill = editor;
-    this.previewEditorService.deltaUnitPreview$.subscribe(
+    this.previewEditorService.subscribeToEditsEditor().subscribe(
       delta => this.previewQuill.updateContents(delta),
     );
   }

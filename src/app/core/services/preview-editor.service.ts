@@ -1,6 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Delta} from 'quill';
+import {Observable} from 'rxjs/internal/Observable';
 import {Subject} from 'rxjs/internal/Subject';
+import {map, switchMap} from 'rxjs/operators';
 
 import {EditorService} from './editor.service';
 
@@ -14,20 +16,21 @@ export class PreviewEditorService {
   private previewDeltaTree: any[];
 
   /**
-   * Observable of deltas that update preview Editor.
-   */
-  public deltaUnitPreview$: Subject<any> = new Subject<any>();
-
-  /**
-   * Subscribes to changes in the delta tree of the editor.
    * Can still use Akita or CQRS/CQS now the solution seems bad.
    *
    * @param editorService Service providing data to preview editor.
    */
   constructor(private editorService: EditorService) {
-    this.editorService.deltaUnitEditor$.subscribe(
-      delta => this.deltaUnitPreview$.next(this.createDeltaForPreview(delta)),
-    );
+  }
+
+  /**
+   * Subscribes to changes in the delta tree of the editor.
+   *
+   * @return delta with modified mention on variables.
+   */
+  public subscribeToEditsEditor(): Observable<Delta> {
+    return this.editorService.deltaUnitEditor$.pipe(
+      map(delta => this.createDeltaForPreview(delta)));
   }
 
   /**
