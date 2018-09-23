@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
 import Quill from 'quill';
 
 import {PreviewEditorService} from '../../../core/services/preview-editor.service';
@@ -9,6 +9,7 @@ import {Subject} from 'rxjs/internal/Subject';
   selector: 'app-preview-area',
   templateUrl: './preview-area.component.html',
   styleUrls: ['./preview-area.component.css'],
+
 })
 export class PreviewAreaComponent implements OnInit, OnDestroy {
   /**
@@ -16,6 +17,7 @@ export class PreviewAreaComponent implements OnInit, OnDestroy {
    */
   public previewQuill: any;
   private $ngUnsubscribe: Subject<void> = new Subject<void>();
+
   /**
    * @param previewEditorService service providing delta data to a preview editor.
    */
@@ -33,6 +35,11 @@ export class PreviewAreaComponent implements OnInit, OnDestroy {
       delta => this.previewQuill.updateContents(delta),
       takeUntil(this.$ngUnsubscribe),
     );
+    this.previewEditorService.contentHighlightingPreview$.subscribe(
+      ({range, oldRange}) => {
+        console.log(range);
+       console.log(this.previewQuill.getLines(range.index, range.length));
+      });
   }
 
   public ngOnInit(): void {
@@ -44,5 +51,8 @@ export class PreviewAreaComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.$ngUnsubscribe.next();
     this.$ngUnsubscribe.complete();
+  }
+
+  click() {
   }
 }

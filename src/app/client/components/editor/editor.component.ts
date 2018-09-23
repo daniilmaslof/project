@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 
 import {Mention} from '../../../core/models/mention';
@@ -9,10 +9,13 @@ import {VariableComponent} from '../variable/variable.component';
 import {Subject} from 'rxjs/internal/Subject';
 import {takeUntil} from 'rxjs/operators';
 
+import {PreviewEditorService} from '../../../core/services/preview-editor.service';
+
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css'],
+
 })
 export class EditorComponent implements OnInit, OnDestroy {
   /**
@@ -33,7 +36,8 @@ export class EditorComponent implements OnInit, OnDestroy {
   constructor(
     private editorService: EditorService,
     private matDialog: MatDialog,
-    private variableService: VariableService) {
+    private variableService: VariableService,
+    private previewEitorService: PreviewEditorService) {
   }
 
   /**
@@ -48,7 +52,6 @@ export class EditorComponent implements OnInit, OnDestroy {
       },
     );
     this.modules = {
-      toolbar: 'full',
       mention: {
         /**
          * Indicates that the mention should be displayed in the list.
@@ -57,7 +60,7 @@ export class EditorComponent implements OnInit, OnDestroy {
         /**
          * Shows which chars show the list of variables.
          */
-        mentionDenotationChars: ['@', '#'],
+        mentionDenotationChars: ['$'],
 
         /**
          * Provides data for displaying a list.
@@ -160,5 +163,14 @@ export class EditorComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.$ngUnsubscribe.next();
     this.$ngUnsubscribe.complete();
+  }
+
+  public handleSelectChange({editor, range, oldRange}: any): any {
+    this.previewEitorService.highlightInThisRange(
+      {
+        range: range,
+        oldRang: oldRange,
+      },
+    );
   }
 }

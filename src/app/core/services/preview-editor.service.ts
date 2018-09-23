@@ -14,6 +14,7 @@ import {EditorService} from './editor.service';
 })
 export class PreviewEditorService {
   private previewDeltaTree: any[];
+  public contentHighlightingPreview$: Subject<any> = new Subject<any>();
 
   /**
    * Can still use Akita or CQRS/CQS now the solution seems bad.
@@ -53,5 +54,9 @@ export class PreviewEditorService {
       }
       return OperationDelta;
     }) as any;
+  }
+
+  public highlightInThisRange(range) {
+    this.contentHighlightingPreview$.next(range);
   }
 }

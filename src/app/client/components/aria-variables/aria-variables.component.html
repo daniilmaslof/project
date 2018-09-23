@@ -6,13 +6,14 @@
     <mat-icon aria-label="add">add</mat-icon>
   </button>
 </div>
-<mat-table class="cars-table mat-elevation-z8"
+<mat-table class="variable-table mat-elevation-z2"
            [dataSource]="dataSource"
            matSort
            (matSortChange)="sortTableChange($event)"
+           [trackBy]="trackByVariable"
            matSortDisableClear>
 
-  <ng-container matColumnDef="name">
+  <ng-container [sticky] matColumnDef="name">
 
     <mat-header-cell *matHeaderCellDef mat-sort-header>name variable</mat-header-cell>
 

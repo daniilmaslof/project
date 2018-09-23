@@ -107,4 +107,8 @@ export class AriaVariablesComponent implements OnInit, OnDestroy {
   public addVariable(): void {
     this.matDialog.open(VariableComponent);
   }
+
+  public trackByVariable(index: number, item: Variable): string {
+    return item.name + item.value;
+  }
 }

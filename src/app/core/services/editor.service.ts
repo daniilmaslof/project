@@ -14,7 +14,6 @@ export class EditorService {
  * The flow delta that comes with the change editor.
  */
   public deltaUnitEditor$: Subject<any> = new Subject<any>();
-
   /**
    * It is necessary to finish it is connected with preservation of that that the user entered.
    * Need to display templates.

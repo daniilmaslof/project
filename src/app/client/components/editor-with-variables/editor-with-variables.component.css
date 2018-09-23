@@ -1,11 +1,19 @@
-app-editor {
-  display: block;
-  width:40vw;
-}
 .container{
   display: flex;
 }
-app-aria-variables{
-  margin-right: 10px;
+.ariaVariables{
+  flex: 1;
+  flex-shrink: 0;
+}
+.editor{
+  flex: 2;
+  margin: 0 10px;
+  width: 40vw;
+  height: calc( 100vh - 8px - 2px - 24px - 24px - 16px);
+}
+.preview{
+  flex: 2;
+  width: 40vw;
+  height: calc( 100vh - 8px - 2px - 24px - 24px - 16px);
 }
 
