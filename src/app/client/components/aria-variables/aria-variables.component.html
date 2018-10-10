@@ -1,8 +1,8 @@
 <div class="table-header mat-elevation-z2">
   <mat-form-field>
-    <input matInput placeholder="Search variable" [formControl]="searchField">
+    <input  matInput placeholder="Search variable" [formControl]="searchField">
   </mat-form-field>
-  <button mat-mini-fab color="primary" (click)="addVariable()">
+  <button mat-mini-fab color="primary"   (click)="addVariable()">
     <mat-icon aria-label="add">add</mat-icon>
   </button>
 </div>
@@ -29,9 +29,15 @@
   </ng-container>
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns" (click)="editVaraible(row)"></mat-row>
+  <mat-row
+    *matRowDef="let row;
+    columns: displayedColumns"
+    (mouseenter)="enter(row)"
+    matTooltip="Info about the action"
+    (mouseleave)="leave()"
+    (click)="editVariable(row)">
+  </mat-row>
 
 </mat-table>
-
 <mat-error>{{dataSource.error$ | async}}</mat-error>
 

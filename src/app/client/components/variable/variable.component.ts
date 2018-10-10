@@ -26,6 +26,8 @@ export class VariableComponent implements OnInit {
    */
   public value: FormControl;
 
+  private description = new FormControl('');
+
   /**
    * @param dialogRef MatDialogRef and use it to close the dialog.
    * @param selectedVariable variable passed to the modal window.Initial value variable form.
@@ -42,16 +44,30 @@ export class VariableComponent implements OnInit {
    */
   public ngOnInit(): void {
     if (!this.selectedVariable) {
-      this.name = new FormControl('', [Validators.required, this.checkForDifferentName(this.variableService.state)]);
+      this.name = new FormControl('',
+        Validators.compose([Validators.required,
+          Validators.pattern(/[\S]+/g),
+          // Validators.pattern(/^[^0-9]/),
+          this.checkForDifferentName(this.variableService.state)],
+      ));
       this.value = new FormControl('');
     } else {
       this.name = new FormControl(
-        this.selectedVariable.name, [Validators.required, this.checkForDifferentName(this.variableService.state, this.selectedVariable)]);
+        this.selectedVariable.name,
+        [
+          Validators.required,
+          Validators.pattern(/\S/g),
+          // Validators.pattern(/[^(\s)]/g),
+          // Validators.pattern(/^[^0-9]/),
+          this.checkForDifferentName(this.variableService.state, this.selectedVariable),
+        ],
+      );
       this.value = new FormControl(this.selectedVariable.value);
     }
     this.variableForm = new FormGroup({
       'name': this.name,
       'value': this.value,
+      'description': this.description,
     });
   }
 

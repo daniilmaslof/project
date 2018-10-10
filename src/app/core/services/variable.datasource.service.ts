@@ -58,9 +58,6 @@ export class VariableDatasourceService implements DataSource<Variable> {
           finalize(() => this.loadingSubject.next(false)),
         );
       }),
-      /**
-       * Fixed an error with takeUntil Leaks when takeUntil to be before switchMap combineLatest.
-       */
       takeUntil(this.$ngUnsubscribe),
     );
   }

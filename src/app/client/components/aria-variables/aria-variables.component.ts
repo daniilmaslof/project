@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {MatDialog, MatDialogConfig, Sort} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatDialogRef, Sort} from '@angular/material';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {Subject} from 'rxjs/internal/Subject';
 import {debounceTime, distinctUntilChanged, takeUntil} from 'rxjs/operators';
@@ -27,6 +27,7 @@ export class AriaVariablesComponent implements OnInit, OnDestroy {
   private $actionsChangeTable: Subject<ParamsTableActions>;
   private paramsTableActions: ParamsTableActions;
   private $ngUnsubscribe: Subject<void> = new Subject<void>();
+  private changeVariableOpen: MatDialogRef<VariableComponent>;
   /**
    * matHeaderRowDef enumeration of column names that we want to display Table.
    */
@@ -95,8 +96,8 @@ export class AriaVariablesComponent implements OnInit, OnDestroy {
    * Open a modal window with a form for changing the variable.
    * @param variable the variable that you want to change.
    */
-  public editVaraible(variable: Variable): void {
-    this.matDialog.open(VariableComponent, {
+  public editVariable(variable: Variable): void {
+    this.changeVariableOpen = this.matDialog.open(VariableComponent, {
       data: variable,
     } as MatDialogConfig<any>);
   }
@@ -108,7 +109,37 @@ export class AriaVariablesComponent implements OnInit, OnDestroy {
     this.matDialog.open(VariableComponent);
   }
 
+  /**
+   * Redrawing on change.
+   *
+   * @param index row in Table
+   * @param item variable in row.
+   */
   public trackByVariable(index: number, item: Variable): string {
     return item.name + item.value;
+  }
+
+  /**
+   * Highlight the variables in the editor when row hover in table.
+   *
+   * @param variable which want to highlight.
+   */
+  public enter(variable: Variable): void {
+    this.changeVariableOpen = null;
+    this.variableService.hoverVariable$.next(variable);
+  }
+
+  /**
+   * Does not highlight the variables in the editor when  row does not hover in table.
+   * At the opening of the variable changes, the highlight stays on.
+   */
+  public leave(): void {
+    if (!this.changeVariableOpen) {
+      this.variableService.hoverVariable$.next();
+    } else {
+      this.changeVariableOpen.afterClosed().subscribe(
+        () => this.variableService.hoverVariable$.next(),
+      );
+    }
   }
 }

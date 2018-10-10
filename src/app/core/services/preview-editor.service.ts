@@ -1,8 +1,10 @@
 import {Injectable} from '@angular/core';
-import {Delta} from 'quill';
+import Delta from 'quill-delta';
 import {Observable} from 'rxjs/internal/Observable';
 import {Subject} from 'rxjs/internal/Subject';
 import {map, switchMap} from 'rxjs/operators';
+
+import {RangesForHighlight} from '../models/ranges-for-highlight';
 
 import {EditorService} from './editor.service';
 
@@ -13,12 +15,10 @@ import {EditorService} from './editor.service';
   providedIn: 'root',
 })
 export class PreviewEditorService {
-  private previewDeltaTree: any[];
-  public contentHighlightingPreview$: Subject<any> = new Subject<any>();
+  private previewDeltaTree: Delta[];
+  public contentHighlightingPreview$: Subject<RangesForHighlight> = new Subject<RangesForHighlight>();
 
   /**
-   * Can still use Akita or CQRS/CQS now the solution seems bad.
-   *
    * @param editorService Service providing data to preview editor.
    */
   constructor(private editorService: EditorService) {
@@ -40,23 +40,29 @@ export class PreviewEditorService {
    * @param deltaEditor received for change editor.
    */
   private createDeltaForPreview(deltaEditor: Delta): Delta {
-    return deltaEditor.ops.map(OperationDelta => {
-      if (OperationDelta.insert && OperationDelta.insert.mention) {
+    return new Delta(deltaEditor.ops.map(operationDelta => {
+      if (operationDelta.insert && operationDelta.insert.mention) {
         return {
+          ...operationDelta,
           insert:
             {
               variables: {
-                name: OperationDelta.insert.mention.value,
-                value: OperationDelta.insert.mention.id,
+                name: operationDelta.insert.mention.value,
+                value: operationDelta.insert.mention.id,
               },
             },
         };
       }
-      return OperationDelta;
-    }) as any;
+      return operationDelta;
+    }));
   }
 
-  public highlightInThisRange(range) {
+  /**
+   * highlights this range.range and remove highlight range.oldRange.
+   *
+   * @param range which will emit contentHighlightingPreview$.
+   */
+  public highlightRange(range: RangesForHighlight): void {
     this.contentHighlightingPreview$.next(range);
   }
 }

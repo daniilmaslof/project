@@ -6,7 +6,7 @@ import {
   MatFormFieldModule,
   MatInputModule,
   MatPaginatorModule,
-  MatTableModule,
+  MatTableModule, MatTooltipModule,
 } from '@angular/material';
 
 @NgModule({
@@ -18,10 +18,12 @@ import {
     MatPaginatorModule,
     MatInputModule,
     MatFormFieldModule,
+    MatTooltipModule,
     ReactiveFormsModule,
   ],
   exports: [
     MatDialogModule,
+    MatTooltipModule,
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,

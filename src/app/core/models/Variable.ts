@@ -12,10 +12,16 @@ export class Variable {
   public value: string;
 
   /**
+   * Value of a variable.
+   */
+  public description?: string;
+
+  /**
    * Init variable.
    */
-  constructor(name: string, value: string) {
+  constructor(name: string, value: string, description: string = '') {
     this.name = name;
+    this.description = description;
     this.value = value;
   }
 }

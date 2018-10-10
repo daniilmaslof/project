@@ -1,4 +1,5 @@
 import Parchment from 'parchment';
+import EmbedBlot from 'parchment/dist/src/blot/embed';
 import Quill from 'quill';
 
 import {Variable} from '../../../../core/models/Variable';
@@ -23,20 +24,35 @@ class VariablesBlot extends Embed {
   }
 
   /**
-   * Provides data dom node to Variable.
+   *  Returns the value represented by domNode if it is this Blot's type.
    *
-   * @param domNode.
+   *  @param domNode  represented by the domNode whose value you want to return.
+   *  @return value variable with data from the dom node.
    */
-  public static value(domNode: any): Variable {
+  public static value(domNode: HTMLElement): Variable {
     return {
       name: domNode.dataset.name,
       value: domNode.dataset.value,
     };
   }
+
+  /**
+   * Don`t highlight this variable.
+   */
+  public doNotHighlight(): void {
+    (this as any).contentNode.classList.remove('variables-highlight');
+  }
+
+  /**
+   * Highlight this variable.
+   */
+  public highlight(): void {
+    (this as any).contentNode.className = 'variables-highlight';
+  }
 }
 
-VariablesBlot.blotName = 'variables';
-VariablesBlot.tagName = 'span';
-VariablesBlot.className = 'variables';
+(VariablesBlot as any).blotName = 'variables';
+(VariablesBlot as any).tagName = 'span';
+(VariablesBlot as any).className = 'variables';
 Parchment.register(VariablesBlot);
 Quill.register(VariablesBlot);

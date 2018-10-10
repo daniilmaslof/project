@@ -8,7 +8,7 @@ import {
   MatListModule,
   MatPaginatorModule, MatProgressSpinnerModule,
   MatSortModule,
-  MatTableModule,
+  MatTableModule, MatTooltipModule,
 } from '@angular/material';
 import {QuillModule} from 'ngx-quill';
 
@@ -17,6 +17,7 @@ import {EditorWithVariablesComponent} from './components/editor-with-variables/e
 import {EditorComponent} from './components/editor/editor.component';
 import {PreviewAreaComponent} from './components/preview-area/preview-area.component';
 import {VariableComponent} from './components/variable/variable.component';
+import { MdePopoverModule } from '@material-extended/mde';
 
 @NgModule({
   imports: [
@@ -32,6 +33,8 @@ import {VariableComponent} from './components/variable/variable.component';
     ReactiveFormsModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    MatTooltipModule,
+    MdePopoverModule,
     MatButtonModule,
     MatDialogModule,
   ],

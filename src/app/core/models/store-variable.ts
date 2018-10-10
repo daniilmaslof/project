@@ -3,6 +3,7 @@ import {Variable} from './Variable';
 
 /**
  * Implementation of the store variable[] with methods state changes.
+ * Although it seems a bad solution because you can only extends the abstraction?.
  */
 export class StoreVariable extends Store<Variable[]> {
   /**

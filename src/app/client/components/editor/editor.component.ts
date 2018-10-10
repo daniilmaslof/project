@@ -1,89 +1,109 @@
-import {Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
+import {QuillEditorComponent} from 'ngx-quill';
+import {Quill, QuillOptionsStatic, RangeStatic, Sources, StringMap} from 'quill';
+import Delta from 'quill-delta';
+import {Subject} from 'rxjs/internal/Subject';
+import {debounceTime, distinctUntilChanged, takeUntil} from 'rxjs/operators';
 
+import {Attribute} from '../../../core/models/attribute';
 import {Mention} from '../../../core/models/mention';
 import {Variable} from '../../../core/models/Variable';
 import {EditorService} from '../../../core/services/editor.service';
+import {PreviewEditorService} from '../../../core/services/preview-editor.service';
+import {ProcessesDeltaTreeService} from '../../../core/services/processes-delta-tree.service';
 import {VariableService} from '../../../core/services/variable.service';
 import {VariableComponent} from '../variable/variable.component';
-import {Subject} from 'rxjs/internal/Subject';
-import {takeUntil} from 'rxjs/operators';
-
-import {PreviewEditorService} from '../../../core/services/preview-editor.service';
 
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css'],
+  encapsulation: ViewEncapsulation.None,
 
 })
 export class EditorComponent implements OnInit, OnDestroy {
+  @ViewChild('toolbar')
+  private toolbar: ElementRef;
   /**
    * Editor instance.
    */
-  public editorQuill: any;
+  public editorQuill: Quill;
   /**
    * Configure/disable quill modules, e.g toolbar or add custom toolbar via html element default is.
    */
-  public modules: any;
+  public modules: StringMap;
   private $ngUnsubscribe: Subject<void> = new Subject<void>();
+
+  private deltaWithOutHighlight: Delta;
 
   /**
    * @param editorService service that stores delta and flow new delta.
    * @param matDialog Service can be used to open modal dialogs.
    * @param variableService service storing variables.
+   * @param previewEditorService service that stores delta preview and some methods of changing the preview editor.
+   * @param processesDeltaTreeService service stores methods for working with Delta.
    */
   constructor(
     private editorService: EditorService,
     private matDialog: MatDialog,
     private variableService: VariableService,
-    private previewEitorService: PreviewEditorService) {
+    private previewEditorService: PreviewEditorService,
+    private processesDeltaTreeService: ProcessesDeltaTreeService) {
   }
 
   /**
    * Subscribes to the change of variables, and change the mention with the value equal name variable  of the variable that changed.
    * Init modules editor.
+   * Subscribe to hover variable row in table and highlight hover mention in editor.
    */
   public ngOnInit(): void {
-    this.variableService.changesInVariables$
-      .pipe(takeUntil(this.$ngUnsubscribe)).subscribe(
-      ([oldVariable, newVaraible]) => {
-        this.changeVariablesInDeltaTree(oldVariable, newVaraible);
+    this.initModulesQuill();
+    this.variableService.hoverVariable$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+    ).subscribe(
+      variable => {
+        if (variable) {
+          if (!this.deltaWithOutHighlight) {
+            this.deltaWithOutHighlight = this.editorQuill.getContents();
+          }
+          this.editorQuill.setContents(
+            this.processesDeltaTreeService.highlightMentionInQuill(
+              this.deltaWithOutHighlight,
+              Mention.createMentionFromVariable(variable),
+              new Attribute('color', 'red'),
+            ),
+            'silent',
+          );
+        } else {
+          this.returnMentionToOriginalAttribute();
+        }
       },
     );
-    this.modules = {
-      mention: {
-        /**
-         * Indicates that the mention should be displayed in the list.
-         */
-        renderItem: mention => mention.value,
-        /**
-         * Shows which chars show the list of variables.
-         */
-        mentionDenotationChars: ['$'],
-
-        /**
-         * Provides data for displaying a list.
-         * @param searchTerm characters entered after denotation char.
-         * @param renderList callback showing list with data mention.
-         */
-        source: (searchTerm, renderList) => {
-          if (searchTerm.length === 0) {
-            renderList(this.variableService.state.map(
-              variable => new Mention(variable.value, variable.name),
-            ), searchTerm);
-          } else {
-            const matches = [];
-            for (let i = 0; i < this.variableService.state.length; i++) {
-              if (-1 * this.variableService.state[i].name.toLowerCase().indexOf(searchTerm) <= 0) {
-                matches.push(this.variableService.state[i]);
-              }
-            }
-            renderList(matches.map(variable => new Mention(variable.value, variable.name)), searchTerm);
-          }
-        },
+    this.variableService.changesInVariables$
+      .pipe(
+        takeUntil(this.$ngUnsubscribe),
+      ).subscribe(
+      ([oldVariable, newVariable]) => {
+        if (this.deltaWithOutHighlight) {
+          this.changeVariablesInDeltaTree(oldVariable, newVariable, this.deltaWithOutHighlight);
+          this.deltaWithOutHighlight = null;
+        } else {
+          this.changeVariablesInDeltaTree(oldVariable, newVariable);
+        }
       },
-    };
+    );
+  }
+
+  /**
+   * return mention to original when highlight is not needed.
+   */
+  private returnMentionToOriginalAttribute(): void {
+    if (this.deltaWithOutHighlight) {
+      this.editorQuill.setContents(this.deltaWithOutHighlight);
+      this.deltaWithOutHighlight = null;
+    }
   }
 
   /**
@@ -92,33 +112,26 @@ export class EditorComponent implements OnInit, OnDestroy {
    * @param oldVariable variable name which is  equal mention value, mentions which are now in the delta tree editor.
    * @param newVariable mentions which are now in the delta tree editor,
    * equal oldVariable value change to a newVariable name and value newVariable = id mention.
+   * @param deltaTree Delta tree on which it want to run.
    */
-  private changeVariablesInDeltaTree(oldVariable: Variable, newVariable: Variable): void {
+  private changeVariablesInDeltaTree(
+    oldVariable: Variable,
+    newVariable: Variable,
+    deltaTree: Delta = this.editorQuill.getContents(),
+  ): void {
     this.editorQuill.setContents(
-      this.editorQuill.getContents().map(
-        deltaOperation => {
-          if (deltaOperation.insert && deltaOperation.insert.mention && deltaOperation.insert.mention.value === oldVariable.name) {
-            return {
-              insert:
-                {
-                  mention: {
-                    denotationChar: deltaOperation.insert.mention.denotationChar,
-                    id: newVariable.value,
-                    value: newVariable.name,
-                  },
-                },
-            };
-          } else {
-            return deltaOperation;
-          }
-        },
-      ) as any);
+      this.processesDeltaTreeService.changeMentionOfOldDataToNewData(
+        deltaTree,
+        Mention.createMentionFromVariable(oldVariable),
+        Mention.createMentionFromVariable(newVariable),
+      ),
+    );
   }
 
   /**
    * Create editor instance.
    */
-  public createdQuill(editor: any): void {
+  public createdQuill(editor: Quill): void {
     this.editorQuill = editor;
   }
 
@@ -131,19 +144,18 @@ export class EditorComponent implements OnInit, OnDestroy {
       this.matDialog.open(VariableComponent);
       return;
     }
-    const dialogWithAddVaraibles = this.matDialog.open(VariableComponent, {
+    const dialogWithAddVariables = this.matDialog.open(VariableComponent, {
       data: new Variable(this.editorQuill.getText(selectionText.index, selectionText.length), ''),
     } as MatDialogConfig<any>);
 
-    dialogWithAddVaraibles.afterClosed().subscribe(
+    dialogWithAddVariables.afterClosed().subscribe(
       variable => {
         if (variable) {
           this.editorQuill.deleteText(selectionText.index, selectionText.length);
-          this.editorQuill.insertEmbed(selectionText.index, 'mention', {
-            denotationChar: this.modules.mention.mentionDenotationChars[0],
-            id: variable.value,
-            value: variable.name,
-          });
+          this.editorQuill.insertEmbed(selectionText.index,
+            'mention',
+            Mention.createMentionFromVariable(variable, this.modules.mention.mentionDenotationChars[0]),
+          );
         }
       },
     );
@@ -153,8 +165,8 @@ export class EditorComponent implements OnInit, OnDestroy {
    * Subscribes to changes content editor and sends delta in editor service.
    * @param editor Editor instance plus new delta and old delta.
    */
-  public handleContentChange(editor: any): void {
-    this.editorService.setChangedDelta(editor.delta);
+  public handleContentChange({delta}: any): void {
+    this.editorService.setChangedDelta(delta);
   }
 
   /**
@@ -165,12 +177,56 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.$ngUnsubscribe.complete();
   }
 
-  public handleSelectChange({editor, range, oldRange}: any): any {
-    this.previewEitorService.highlightInThisRange(
+  /**
+   * init highlights in the preview editor this range and does not highlight this oldRange.
+   */
+  public handleSelectChange({editor, range, oldRange}: any): void {
+    this.previewEditorService.highlightRange(
       {
         range: range,
-        oldRang: oldRange,
+        oldRange: oldRange,
       },
     );
   }
+
+  /**
+   * init module with mention module and toolbar.
+   */
+  private initModulesQuill(): void {
+    this.modules = {
+      toolbar: this.toolbar.nativeElement,
+      mention: {
+        /**
+         * Indicates that the mention should be displayed in the list.
+         */
+        renderItem: mention => mention.value,
+        /**
+         * Shows which chars show the list of variables.
+         */
+        mentionDenotationChars: ['$'],
+        allowedChars: /^[a-zA-Z0-9а-я_]*$/,
+        /**
+         * Provides data for displaying a list.
+         * @param searchTerm characters entered after denotation char.
+         * @param renderList callback showing list with data mention.
+         */
+        source: (searchTerm: string, renderList: (data: Mention[] | { id: string, value: string }, searchTerm: string) => void) => {
+          if (searchTerm.length === 0) {
+            renderList(this.variableService.state.map(
+              variable => Mention.createMentionFromVariable(variable),
+            ), searchTerm);
+          } else {
+            const matches = [];
+            for (let i = 0; i < this.variableService.state.length; i++) {
+              if (-1 * this.variableService.state[i].name.toLowerCase().indexOf(searchTerm) <= 0) {
+                matches.push(this.variableService.state[i]);
+              }
+            }
+            renderList(matches.map(variable => Mention.createMentionFromVariable(variable)), searchTerm);
+          }
+        },
+      },
+    };
+  }
+
 }

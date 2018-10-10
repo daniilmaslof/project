@@ -1,3 +1,27 @@
-.addVariables{
+.addVariables {
   white-space: nowrap;
 }
+
+.toolbar-editor {
+  height: 60px;
+  width: calc(80vw - 20px);
+}
+
+#scrolling-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  min-height: calc(100vh - 60px);
+  width: 80vw;
+  overflow-y: auto;
+}
+
+.editor {
+  width: auto;
+  max-width: none;
+  min-width: calc(40vw - 10px);
+}
+
+.preview {
+  min-width: calc(40vw - 10px);
+}
+

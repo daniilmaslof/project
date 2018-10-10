@@ -22,6 +22,10 @@ export class VariableService extends StoreVariable {
   public changesInVariables$: Subject<[Variable, Variable]> = new Subject<[Variable, Variable]>();
 
   /**
+   * Subject when changing a variable, it emits a old Variables and new Variables.
+   */
+  public hoverVariable$: Subject<Variable> = new Subject<Variable>();
+  /**
    * Init StoreVariables.
    */
   constructor() {

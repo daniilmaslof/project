@@ -1,6 +1,7 @@
 <quill-editor
   (onEditorCreated)="createdPreviewQuill($event)"
-  [style]="{border:'solid 1px black'}"
+  [style]="{height: 'auto', 'min-height': 'calc( 100vh - 80px)',border: '1px black solid'}"
   [readOnly]="true"
+  [scrollingContainer]="'#scrolling-container'"
   [theme]="'bubble'">
 </quill-editor>

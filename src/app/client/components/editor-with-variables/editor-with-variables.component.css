@@ -1,19 +1,8 @@
+
+.ariaVariables{
+  width: calc(20vw - 2px);
+}
+
 .container{
   display: flex;
 }
-.ariaVariables{
-  flex: 1;
-  flex-shrink: 0;
-}
-.editor{
-  flex: 2;
-  margin: 0 10px;
-  width: 40vw;
-  height: calc( 100vh - 8px - 2px - 24px - 24px - 16px);
-}
-.preview{
-  flex: 2;
-  width: 40vw;
-  height: calc( 100vh - 8px - 2px - 24px - 24px - 16px);
-}
-
