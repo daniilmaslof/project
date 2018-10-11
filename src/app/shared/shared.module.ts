@@ -2,34 +2,33 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
+  MatButtonModule,
   MatDialogModule,
-  MatFormFieldModule,
+  MatFormFieldModule, MatIconModule,
   MatInputModule,
-  MatPaginatorModule,
-  MatTableModule, MatTooltipModule,
+  MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule, MatSidenavModule, MatSortModule,
+  MatTableModule, MatTabsModule, MatTooltipModule,
 } from '@angular/material';
+import {MdePopoverModule} from '@material-extended/mde';
 
 @NgModule({
   imports: [
     CommonModule,
-    MatDialogModule,
-    FormsModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatTooltipModule,
-    ReactiveFormsModule,
   ],
   exports: [
-    MatDialogModule,
-    MatTooltipModule,
     FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
+    MatSortModule,
+    MatDialogModule,
     MatTableModule,
     MatPaginatorModule,
     MatInputModule,
+    MatFormFieldModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatTooltipModule,
+    MdePopoverModule,
+    MatButtonModule,
+    MatDialogModule,
   ],
   declarations: [],
 })

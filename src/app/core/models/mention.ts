@@ -1,8 +1,8 @@
+import {Variable} from './variable';
+
 /**
  * Is needed to create mention in editor and transform to variable in Preview.
  */
-import {Variable} from './Variable';
-
 export class Mention {
   /**
    * id mention  equal to the value of the variable.

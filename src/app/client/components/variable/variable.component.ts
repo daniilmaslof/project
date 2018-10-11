@@ -2,9 +2,12 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {AbstractControl, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
-import {Variable} from '../../../core/models/Variable';
+import {Variable} from '../../../core/models/variable';
 import {VariableService} from '../../../core/services/variable.service';
 
+/**
+ * Component to create a variable using a variable form.
+ */
 @Component({
   selector: 'app-variable',
   templateUrl: './variable.component.html',
@@ -45,20 +48,17 @@ export class VariableComponent implements OnInit {
   public ngOnInit(): void {
     if (!this.selectedVariable) {
       this.name = new FormControl('',
-        Validators.compose([Validators.required,
-          Validators.pattern(/[\S]+/g),
-          // Validators.pattern(/^[^0-9]/),
-          this.checkForDifferentName(this.variableService.state)],
-      ));
+        [
+          Validators.required,
+          this.checkForDifferentName(this.variableService.state),
+        ],
+      );
       this.value = new FormControl('');
     } else {
       this.name = new FormControl(
         this.selectedVariable.name,
         [
           Validators.required,
-          Validators.pattern(/\S/g),
-          // Validators.pattern(/[^(\s)]/g),
-          // Validators.pattern(/^[^0-9]/),
           this.checkForDifferentName(this.variableService.state, this.selectedVariable),
         ],
       );

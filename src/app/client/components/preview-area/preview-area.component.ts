@@ -10,13 +10,16 @@ import {RangeAttribute} from '../../../core/models/range-attribute';
 import {PreviewEditorService} from '../../../core/services/preview-editor.service';
 import {ProcessesDeltaTreeService} from '../../../core/services/processes-delta-tree.service';
 
+/**
+ * Component with preview editor.
+ */
 @Component({
   selector: 'app-preview-area',
   templateUrl: './preview-area.component.html',
   styleUrls: ['./preview-area.component.css'],
 
 })
-export class PreviewAreaComponent implements OnInit, OnDestroy {
+export class PreviewAreaComponent implements  OnDestroy {
   /**
    * Preview editor instance.
    */
@@ -68,9 +71,11 @@ export class PreviewAreaComponent implements OnInit, OnDestroy {
     /**
      * Remove  highlighting of the old range text and highlight new range.
      */
-    this.previewEditorService.contentHighlightingPreview$.subscribe(
+    this.previewEditorService.contentHighlightingPreview$.pipe(
+      takeUntil(this.$ngUnsubscribe),
+    ).subscribe(
       ({range, oldRange}) => {
-        this.notHighlight(oldRange);
+        this.doNotHighlight(oldRange);
         this.highlight(range);
       });
   }
@@ -80,17 +85,17 @@ export class PreviewAreaComponent implements OnInit, OnDestroy {
    *
    * @param oldRange the range in the preview where you want to restore the original attributes.
    */
-  private notHighlight(oldRange: RangeStatic): void {
-    let notHighlightVariables = false;
+  private doNotHighlight(oldRange: RangeStatic): void {
+    let variablesNotHighlight = false;
     if (oldRange && oldRange.length !== 0) {
       if (oldRange.length === 1) {
         const blot = this.previewQuill.getLeaf(oldRange.index + oldRange.length)[0];
         if (blot.statics.blotName === 'variables') {
           blot.doNotHighlight();
-          notHighlightVariables = true;
+          variablesNotHighlight = true;
         }
       }
-      if (!notHighlightVariables) {
+      if (!variablesNotHighlight) {
         this.returnToOriginalBackground();
       }
     }
@@ -134,9 +139,6 @@ export class PreviewAreaComponent implements OnInit, OnDestroy {
     this.backgroundRanges = [];
     this.isContentSelected = false;
     this.backgroundOfSelectedContentChanged = false;
-  }
-
-  public ngOnInit(): void {
   }
 
   /**

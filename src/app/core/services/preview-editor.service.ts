@@ -16,6 +16,10 @@ import {EditorService} from './editor.service';
 })
 export class PreviewEditorService {
   private previewDeltaTree: Delta[];
+
+  /**
+   * Emits the range to be highlight content and the range to be deselected in preview content.
+   */
   public contentHighlightingPreview$: Subject<RangesForHighlight> = new Subject<RangesForHighlight>();
 
   /**

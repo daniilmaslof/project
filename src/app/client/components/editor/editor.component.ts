@@ -1,6 +1,6 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
-import {QuillEditorComponent} from 'ngx-quill';
+
 import {Quill, QuillOptionsStatic, RangeStatic, Sources, StringMap} from 'quill';
 import Delta from 'quill-delta';
 import {Subject} from 'rxjs/internal/Subject';
@@ -8,13 +8,17 @@ import {debounceTime, distinctUntilChanged, takeUntil} from 'rxjs/operators';
 
 import {Attribute} from '../../../core/models/attribute';
 import {Mention} from '../../../core/models/mention';
-import {Variable} from '../../../core/models/Variable';
+import {RangesForHighlight} from '../../../core/models/ranges-for-highlight';
+import {Variable} from '../../../core/models/variable';
 import {EditorService} from '../../../core/services/editor.service';
 import {PreviewEditorService} from '../../../core/services/preview-editor.service';
 import {ProcessesDeltaTreeService} from '../../../core/services/processes-delta-tree.service';
 import {VariableService} from '../../../core/services/variable.service';
 import {VariableComponent} from '../variable/variable.component';
 
+/**
+ * Component with  editor.
+ */
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
@@ -35,7 +39,7 @@ export class EditorComponent implements OnInit, OnDestroy {
   public modules: StringMap;
   private $ngUnsubscribe: Subject<void> = new Subject<void>();
 
-  private deltaWithOutHighlight: Delta;
+  private deltaTreeWithOutHighlight: Delta;
 
   /**
    * @param editorService service that stores delta and flow new delta.
@@ -65,18 +69,21 @@ export class EditorComponent implements OnInit, OnDestroy {
     ).subscribe(
       variable => {
         if (variable) {
-          if (!this.deltaWithOutHighlight) {
-            this.deltaWithOutHighlight = this.editorQuill.getContents();
+          if (!this.deltaTreeWithOutHighlight) {
+            this.deltaTreeWithOutHighlight = this.editorQuill.getContents();
           }
           this.editorQuill.setContents(
             this.processesDeltaTreeService.highlightMentionInQuill(
-              this.deltaWithOutHighlight,
+              this.deltaTreeWithOutHighlight,
               Mention.createMentionFromVariable(variable),
               new Attribute('color', 'red'),
             ),
             'silent',
           );
         } else {
+          /**
+           * If variable === null so mouse leaves with variables and need original delta tree with out highlight.
+           */
           this.returnMentionToOriginalAttribute();
         }
       },
@@ -86,9 +93,9 @@ export class EditorComponent implements OnInit, OnDestroy {
         takeUntil(this.$ngUnsubscribe),
       ).subscribe(
       ([oldVariable, newVariable]) => {
-        if (this.deltaWithOutHighlight) {
-          this.changeVariablesInDeltaTree(oldVariable, newVariable, this.deltaWithOutHighlight);
-          this.deltaWithOutHighlight = null;
+        if (this.deltaTreeWithOutHighlight) {
+          this.changeVariablesInDeltaTree(oldVariable, newVariable, this.deltaTreeWithOutHighlight);
+          this.deltaTreeWithOutHighlight = null;
         } else {
           this.changeVariablesInDeltaTree(oldVariable, newVariable);
         }
@@ -100,9 +107,9 @@ export class EditorComponent implements OnInit, OnDestroy {
    * return mention to original when highlight is not needed.
    */
   private returnMentionToOriginalAttribute(): void {
-    if (this.deltaWithOutHighlight) {
-      this.editorQuill.setContents(this.deltaWithOutHighlight);
-      this.deltaWithOutHighlight = null;
+    if (this.deltaTreeWithOutHighlight) {
+      this.editorQuill.setContents(this.deltaTreeWithOutHighlight);
+      this.deltaTreeWithOutHighlight = null;
     }
   }
 
@@ -165,7 +172,7 @@ export class EditorComponent implements OnInit, OnDestroy {
    * Subscribes to changes content editor and sends delta in editor service.
    * @param editor Editor instance plus new delta and old delta.
    */
-  public handleContentChange({delta}: any): void {
+  public handleContentChange({delta}: Delta): void {
     this.editorService.setChangedDelta(delta);
   }
 
@@ -180,7 +187,7 @@ export class EditorComponent implements OnInit, OnDestroy {
   /**
    * init highlights in the preview editor this range and does not highlight this oldRange.
    */
-  public handleSelectChange({editor, range, oldRange}: any): void {
+  public handleSelectChange({ range, oldRange}: RangesForHighlight): void {
     this.previewEditorService.highlightRange(
       {
         range: range,

@@ -17,7 +17,6 @@ import {EditorWithVariablesComponent} from './components/editor-with-variables/e
 import {EditorComponent} from './components/editor/editor.component';
 import {PreviewAreaComponent} from './components/preview-area/preview-area.component';
 import {VariableComponent} from './components/variable/variable.component';
-import { MdePopoverModule } from '@material-extended/mde';
 
 @NgModule({
   imports: [
@@ -25,7 +24,6 @@ import { MdePopoverModule } from '@material-extended/mde';
     QuillModule,
     MatSortModule,
     MatDialogModule,
-    FormsModule,
     MatTableModule,
     MatPaginatorModule,
     MatInputModule,
@@ -34,7 +32,6 @@ import { MdePopoverModule } from '@material-extended/mde';
     MatProgressSpinnerModule,
     MatIconModule,
     MatTooltipModule,
-    MdePopoverModule,
     MatButtonModule,
     MatDialogModule,
   ],

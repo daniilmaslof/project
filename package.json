@@ -22,13 +22,11 @@
     "@angular/platform-browser": "^6.1.9",
     "@angular/platform-browser-dynamic": "^6.1.9",
     "@angular/router": "^6.1.9",
-    "@datorama/akita": "^1.9.6",
     "@material-extended/mde": "^2.1.0",
     "core-js": "^2.5.4",
     "ngx-quill": "^3.6.0",
     "parchment": "^1.1.4",
     "quill-mention": "^2.0.2",
-    "quill-mentions": "^0.2.4",
     "rxjs": "^6.3.3",
     "zone.js": "~0.8.26"
   },

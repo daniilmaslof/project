@@ -5,8 +5,8 @@ import {Observable, of} from 'rxjs';
 import {Subject} from 'rxjs/internal/Subject';
 import {catchError, finalize, switchMap, takeUntil} from 'rxjs/operators';
 
-import {ParamsTableActions} from '../models/ParamsTableActions';
-import {Variable} from '../models/Variable';
+import {ParamsTableActions} from '../models/params-table-actions';
+import {Variable} from '../models/variable';
 
 import {VariableService} from './variable.service';
 /**

@@ -14,12 +14,9 @@ import {SharedModule} from './shared/shared.module';
   ],
   imports: [
     BrowserModule,
-    CoreModule,
     SharedModule,
+    CoreModule,
     ClientModule,
-    MatTabsModule,
-    MatSidenavModule,
-    MatProgressBarModule,
     BrowserAnimationsModule,
   ],
   providers: [],

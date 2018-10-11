@@ -3,9 +3,9 @@ import {Observable} from 'rxjs';
 import {Subject} from 'rxjs/internal/Subject';
 import { map} from 'rxjs/operators';
 
-import {ParamsTableActions} from '../models/ParamsTableActions';
+import {ParamsTableActions} from '../models/params-table-actions';
 
-import {Variable} from '../models/Variable';
+import {Variable} from '../models/variable';
 
 import {StoreVariable} from '../models/store-variable';
 

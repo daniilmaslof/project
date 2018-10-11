@@ -5,8 +5,8 @@ import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {Subject} from 'rxjs/internal/Subject';
 import {debounceTime, distinctUntilChanged, takeUntil} from 'rxjs/operators';
 
-import {ParamsTableActions} from '../../../core/models/ParamsTableActions';
-import {Variable} from '../../../core/models/Variable';
+import {ParamsTableActions} from '../../../core/models/params-table-actions';
+import {Variable} from '../../../core/models/variable';
 import {VariableDatasourceService} from '../../../core/services/variable.datasource.service';
 import {VariableService} from '../../../core/services/variable.service';
 import {VariableComponent} from '../variable/variable.component';
@@ -27,7 +27,7 @@ export class AriaVariablesComponent implements OnInit, OnDestroy {
   private $actionsChangeTable: Subject<ParamsTableActions>;
   private paramsTableActions: ParamsTableActions;
   private $ngUnsubscribe: Subject<void> = new Subject<void>();
-  private changeVariableOpen: MatDialogRef<VariableComponent>;
+  private changeVariableDialogRef: MatDialogRef<VariableComponent>;
   /**
    * matHeaderRowDef enumeration of column names that we want to display Table.
    */
@@ -47,7 +47,7 @@ export class AriaVariablesComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Create a CarsDatasourceService that provides data to the table that,
+   * Create a VariableDatasourceService that provides data to the table that,
    * gets them when emitting $actionsChangeTable emits a change of variableService.
    */
   public ngOnInit(): void {
@@ -97,7 +97,7 @@ export class AriaVariablesComponent implements OnInit, OnDestroy {
    * @param variable the variable that you want to change.
    */
   public editVariable(variable: Variable): void {
-    this.changeVariableOpen = this.matDialog.open(VariableComponent, {
+    this.changeVariableDialogRef = this.matDialog.open(VariableComponent, {
       data: variable,
     } as MatDialogConfig<any>);
   }
@@ -125,20 +125,21 @@ export class AriaVariablesComponent implements OnInit, OnDestroy {
    * @param variable which want to highlight.
    */
   public enter(variable: Variable): void {
-    this.changeVariableOpen = null;
+    this.changeVariableDialogRef = null;
     this.variableService.hoverVariable$.next(variable);
   }
 
   /**
    * Does not highlight the variables in the editor when  row does not hover in table.
    * At the opening of the variable changes, the highlight stays on.
+   * Emit empty value in hoverVariable$ to mouse leave with variables.
    */
   public leave(): void {
-    if (!this.changeVariableOpen) {
-      this.variableService.hoverVariable$.next();
+    if (!this.changeVariableDialogRef) {
+      this.variableService.hoverVariable$.next(null);
     } else {
-      this.changeVariableOpen.afterClosed().subscribe(
-        () => this.variableService.hoverVariable$.next(),
+      this.changeVariableDialogRef.afterClosed().subscribe(
+        () => this.variableService.hoverVariable$.next(null),
       );
     }
   }

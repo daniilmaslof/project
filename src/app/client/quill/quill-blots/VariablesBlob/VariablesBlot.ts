@@ -2,7 +2,7 @@ import Parchment from 'parchment';
 import EmbedBlot from 'parchment/dist/src/blot/embed';
 import Quill from 'quill';
 
-import {Variable} from '../../../../core/models/Variable';
+import {Variable} from '../../../../core/models/variable';
 
 const Embed = Quill.import('blots/embed');
 

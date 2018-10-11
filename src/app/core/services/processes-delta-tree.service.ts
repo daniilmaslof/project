@@ -23,6 +23,7 @@ export class ProcessesDeltaTreeService {
    * @param content the selected Delta tree from which you want to stores all ranges with the specified attribute.
    * @param attribute  by which the highlight is made.
    * @param initialIndex the index at which to start the selection.
+   * @return array array of attributes with their start index and length.
    */
   public getAttributeRanges(content: Delta, attribute: Attribute, initialIndex: number = 0): RangeAttribute[] {
     const rangesAttribute = [];
@@ -64,9 +65,9 @@ export class ProcessesDeltaTreeService {
 
   /**
    * Get an array of ranges attribute of the provided Delta tree with this attribute.
-   *
    * @param content the selected Delta tree from which you want to stores all ranges with the specified attribute.
-   * @param rangesAttribute
+   * @param rangesAttribute  attribute, start index and the length attribute  in the Delta tree.
+   * @return delta tree with original attribute (before highlight)
    */
   public returnDeltaTreeToOriginalAttribute(content: Delta, rangesAttribute: RangeAttribute[]): Delta {
     let currentRangeAttribute = rangesAttribute.shift();
@@ -121,34 +122,40 @@ export class ProcessesDeltaTreeService {
       [],
     );
   }
-
   /**
    * Replaces this attribute for Delta.
    *
    * @param delta which attribute should be replaced.
-   * @param attribute the Delta attribute must be replaced with this.
+   * @param replacedAttribute the Delta attribute must be replaced with this.
+   * @return delta with replaced attribute.
    */
-  public changeDeltaAttribute(delta: Delta, attribute: Attribute): Delta {
-    const attributes = {...delta.attributes};
-    if (attribute.value) {
-      attributes[attribute.key] = attribute.value;
+  public changeDeltaAttribute(delta: Delta, replacedAttribute: Attribute): Delta {
+    if (replacedAttribute.value !== '') {
+      if (delta.attributes) {
+        delta.attributes[replacedAttribute.key] = replacedAttribute.value;
+      } else {
+        const attributes = {};
+        attributes[replacedAttribute.key] = replacedAttribute.value;
+        delta = {
+          ...delta,
+          attributes,
+        };
+      }
     } else if (delta.attributes) {
-      delete delta.attributes[attribute.key];
+      delete delta.attributes[replacedAttribute.key];
     }
     if (delta.attributes && Object.keys(delta.attributes).length === 0) {
       delete delta.attributes;
-      return delta;
+
     }
-    return {
-      ...delta,
-      attributes,
-    };
+    return delta;
   }
 
   /**
    * Checks stores the Delta retain or insert.
    *
    * @param delta to be checked.
+   * @return the answer to the question whether the Delta contains insert or retain.
    */
   public checkDeltaForPresenceInsertOrRetrain(delta: Delta): boolean {
     let isDeltaContainInsert = false;
@@ -166,16 +173,17 @@ export class ProcessesDeltaTreeService {
    *
    * @param delta that is checked for an selection attribute.
    * @param selectionAttribute attribute highlight.
+   * @return answer to the question whether the highlight attribute has changed.
    */
   public checksDeltaForPresenceOfAttribute(delta: Delta, selectionAttribute: Attribute): boolean {
-    let attributeOfSelectedContentChanged = false;
+    let isAttributeOfSelectedContentChange = false;
     delta.forEach(operationDelta => {
       if (operationDelta.attributes && operationDelta.attributes[selectionAttribute.key]) {
-        attributeOfSelectedContentChanged = true;
+        isAttributeOfSelectedContentChange = true;
         return;
       }
     });
-    return attributeOfSelectedContentChanged;
+    return isAttributeOfSelectedContentChange;
   }
 
   /**
@@ -184,6 +192,7 @@ export class ProcessesDeltaTreeService {
    * @param contentDeltaTree in this tree you need to replace.
    * @param oldMention the mention that will be replaced by.
    * @param newMention.
+   * @return Delta tree with replaced old mention to new mention.
    */
   public changeMentionOfOldDataToNewData(contentDeltaTree: Delta, oldMention: Mention, newMention: Mention): Delta {
     return new Delta(contentDeltaTree.map(deltaOperation => {
@@ -194,6 +203,7 @@ export class ProcessesDeltaTreeService {
             insert: {
               mention: newMention,
             },
+            attributes: deltaOperation.attributes,
           };
         } else {
           return deltaOperation;
@@ -208,6 +218,7 @@ export class ProcessesDeltaTreeService {
    * @param content the tree in which you want to select all the mention.
    * @param mention that you want to highlight.
    * @param attributeHighlight attribute that highlights mention.
+   * @return Delta tree with highlighted mention.
    */
   public highlightMentionInQuill(content: Delta,
                                  mention: Mention,

@@ -16,7 +16,7 @@ class MentionBlot extends Embed {
    *  @return node html element with initial value.
    */
   public static create(data: Mention): HTMLElement {
-    const node: any = super.create();
+    const node: HTMLElement = super.create();
     const denotationChar = document.createElement('span');
     denotationChar.className = 'ql-mention-denotation-char';
     denotationChar.innerHTML = data.denotationChar;
@@ -27,7 +27,6 @@ class MentionBlot extends Embed {
     node.dataset.denotationChar = data.denotationChar;
     return node;
   }
-
   /**
    *  Returns the value represented by domNode if it is this Blot's type.
    *  @param domNode  represented by the domNode whose value you want to return.

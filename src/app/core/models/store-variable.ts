@@ -1,5 +1,5 @@
-import {Store} from './Store';
-import {Variable} from './Variable';
+import {Store} from './store';
+import {Variable} from './variable';
 
 /**
  * Implementation of the store variable[] with methods state changes.
